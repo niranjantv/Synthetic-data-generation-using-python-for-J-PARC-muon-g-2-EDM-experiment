@@ -13,3 +13,8 @@ This repository contains the code to simulate positron trajectories in the prese
 ### Functions
 - Code contains different functions which can be used to model the trajctory and noise levels.
 
+### Generated files
+- All the genrated files contains around 1000 number of helical tracks with different pile up rate.
+- e.g --> tracks_1_1ns_1000 contains 1000 tracks with pile up rate of 1 decay per 1 nano second.
+
+
