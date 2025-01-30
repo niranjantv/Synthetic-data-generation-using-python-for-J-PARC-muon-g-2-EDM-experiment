@@ -236,7 +236,13 @@ def generate_single_track(track_no,
     d0 = np.random.uniform(250, 300)  # Impact parameter (mm)
     z0 = np.random.uniform(-100, 100)  # Initial position
     phi = np.random.uniform(0, 2 * np.pi)  # Random initial angle
-    theta = np.arctan(np.random.uniform(-0.35, 0.35))  # Random theta angle
+    # Generate theta value while excluding the range -0.1 to 0.1
+    theta = np.random.uniform(-0.35, 0.35)
+    while -0.05 < theta < 0.05:
+        theta = np.random.uniform(-0.35, 0.35)
+
+        theta = np.arctan(theta)  # tan(theta)
+  # Random theta angle
     tan_theta = np.tan(theta)  # tan(theta)
 
     num_points = 10000
@@ -334,7 +340,7 @@ def generate_multiple_tracks_with_pileup(num_intervals, num_secondary, secondary
     track_counter = 1  # Continuous track numbering
 
     for interval in range(num_intervals):
-        num_tracks = np.random.randint(2, 3)  # Random number of tracks in each interval
+        num_tracks = np.random.randint(5, 6)  # Random number of tracks in each interval
         start_time = interval * 5  # Start time of the interval
 
         for _ in range(num_tracks):
