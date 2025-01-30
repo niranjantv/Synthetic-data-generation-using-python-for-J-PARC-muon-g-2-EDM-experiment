@@ -179,11 +179,10 @@ def helix(t, d0, z0, phi, kappa, tan_theta, alpha=0):
 
     return x, y, z, R
 
-
 def generate_single_track(track_no,
      start_time,
-     num_hit_points_with_noise=np.random.randint(2, 6),
-     num_noise_points=np.random.randint(1,3),
+     num_hit_points_with_noise=np.random.randint(1, 4),
+     num_noise_points=np.random.randint(1,2),
      noise_radius=3.0,
      spiral_rate=np.random.uniform(-0.1, -0.5)
 ):
@@ -207,13 +206,37 @@ def generate_single_track(track_no,
 
     q = 1  # Charge of positron
     p_T = p  # Transverse momentum
-    radius = p_T / (q * B)  # Initial radius of curvature (mm)
-    kappa = 1 / radius  # Initial curvature
+    print(f"p: {p:.2f}")
+    # Adjust the radius factor based on momentum using piecewise mapping
+    def get_radius_factor(momentum):
+    # Linear interpolation between points
+        if 20 <= momentum < 100:
+        # Interpolating between 600 and 350 for momentum in the range [30, 100]
+            return 600 - (momentum - 20) * (600 - 400) / (100 - 20)
+        elif 100 <= momentum < 200:
+        # Interpolating between 350 and 150 for momentum in the range [100, 200]
+            return 300 - (momentum - 100) * (300 - 150) / (200 - 100)
+        elif 200 <= momentum <= 300:
+        # Interpolating between 150 and 100 for momentum in the range [200, 300]
+            return 150 - (momentum - 200) * (150 - 50) / (300 - 200)
+        else:
+        # Default if momentum is out of the expected range
+            return 150
+
+
+    # Get the radius factor based on the momentum
+    radius_factor = get_radius_factor(p)
+
+    # Calculate radius of curvature based on the adjusted radius factor
+    radius = (radius_factor / p) * p_T / (q * B)  # Updated radius calculation
+    kappa = 1 / radius  # Curvature
+
+    print(f"Calculated radius: {radius:.2f} mm, kappa: {kappa:.4f}")  # Debugging radius and kappa
 
     d0 = np.random.uniform(250, 300)  # Impact parameter (mm)
     z0 = np.random.uniform(-100, 100)  # Initial position
     phi = np.random.uniform(0, 2 * np.pi)  # Random initial angle
-    theta = np.arctan(np.random.uniform(-0.45, 0.45))  # Random theta angle
+    theta = np.arctan(np.random.uniform(-0.35, 0.35))  # Random theta angle
     tan_theta = np.tan(theta)  # tan(theta)
 
     num_points = 10000
@@ -283,8 +306,8 @@ def generate_single_track(track_no,
     if np.random.rand() < secondary_probability:
         hit_points = add_secondary_electrons_to_random_hit_points(
             hit_points, 
-            num_hit_points_range=(0, 5), 
-            num_secondary_range=(5, 10), 
+            num_hit_points_range=(0, 4), 
+            num_secondary_range=(4, 8), 
             z_variation=10
         )
 
@@ -311,7 +334,7 @@ def generate_multiple_tracks_with_pileup(num_intervals, num_secondary, secondary
     track_counter = 1  # Continuous track numbering
 
     for interval in range(num_intervals):
-        num_tracks = np.random.randint(30, 51)  # Random number of tracks in each interval
+        num_tracks = np.random.randint(2, 3)  # Random number of tracks in each interval
         start_time = interval * 5  # Start time of the interval
 
         for _ in range(num_tracks):
@@ -330,7 +353,7 @@ def generate_multiple_tracks_with_pileup(num_intervals, num_secondary, secondary
 
 
 # Generate tracks with pile-up
-num_intervals = 25
+num_intervals = 1
 all_hit_points, first_hits = generate_multiple_tracks_with_pileup(num_intervals, num_secondary=0, secondary_probability=secondary_probability)
 
 
@@ -431,4 +454,5 @@ plt.tight_layout()
 
 # Show the plot
 plt.show()
+
 
